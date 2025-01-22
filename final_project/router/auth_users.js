@@ -42,11 +42,13 @@ regd_users.post("/login", (req, res) => {
 
   return res.status(200).json({ message: "Login successful", token });
 });
+
 // Add a book review
 regd_users.put("/auth/review/:isbn", (req, res) => {
   const authHeader = req.headers["authorization"]; // Get the Authorization header
   const { review } = req.body;
   const { isbn } = req.params;
+
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
     return res
       .status(401)
@@ -57,21 +59,20 @@ regd_users.put("/auth/review/:isbn", (req, res) => {
   const token = authHeader.split(" ")[1];
 
   try {
-    // Replace with your actual secret key
     const verifiedToken = jwt.verify(token, secret); // Verify the token
-    console.log(verifiedToken);
-    if (!verifiedToken) {
-      res.send("not a valid token");
-      return;
+    const username = verifiedToken.username; // Extract username from token
+
+    if (!books[isbn]) {
+      return res.status(404).json({ message: "Book not found" });
     }
 
-    const filteredBook = books[isbn].reviews.push(review);
-    books.push(...books, filteredBook);
+    // Add/Update the review
+    books[isbn].reviews[username] = review;
 
-    // Proceed with the logic after token validation
-    return res
-      .status(200)
-      .json({ message: "Token verified successfully", verifiedToken });
+    return res.status(200).json({
+      message: "Review added/updated successfully",
+      book: books[isbn],
+    });
   } catch (err) {
     return res.status(403).json({ message: "Invalid or expired token" });
   }
