@@ -44,7 +44,8 @@ regd_users.post("/login", (req, res) => {
 });
 
 // Add a book review
-regd_users.put("/auth/review/:isbn", (req, res) => {
+regd_users.put("/review/:isbn", (req, res) => {
+  console.log("PUT request received for /auth/review/:isbn");
   const authHeader = req.headers["authorization"]; // Get the Authorization header
   const { review } = req.body;
   const { isbn } = req.params;
